@@ -1,0 +1,35 @@
+name: selftest
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  selftest:
+    if: ${{ github.repository == 'ned-mind/deadman-action' }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: checkin
+        uses: ./
+        with: {watch-id: "${{ secrets.NED_TEST_WATCH_ID }}", signing-secret: "${{ secrets.NED_TEST_SIGNING_SECRET }}"}
+      - id: start
+        uses: ./
+        with: {mode: start, run-id: "selftest-${{ github.run_id }}-${{ matrix.os }}", watch-id: "${{ secrets.NED_TEST_OVERRUN_ID }}", signing-secret: "${{ secrets.NED_TEST_OVERRUN_SECRET }}"}
+      - id: finish
+        uses: ./
+        if: always()
+        with: {mode: finish, run-id: "selftest-${{ github.run_id }}-${{ matrix.os }}", watch-id: "${{ secrets.NED_TEST_OVERRUN_ID }}", signing-secret: "${{ secrets.NED_TEST_OVERRUN_SECRET }}"}
+      - id: wrong
+        uses: ./
+        with: {watch-id: "${{ secrets.NED_TEST_WATCH_ID }}", signing-secret: "whs_definitely_wrong"}
+      - name: check
+        shell: bash
+        run: |
+          test "${{ steps.checkin.outputs.ok }}" = "true"
+          test "${{ steps.start.outputs.ok }}" = "true"
+          test "${{ steps.finish.outputs.ok }}" = "true"
+          test "${{ steps.wrong.outputs.ok }}" = "false"
+          echo "all good"

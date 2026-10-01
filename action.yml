@@ -1,0 +1,52 @@
+name: "Ned Watch: deadman check-in"
+description: "Wake me when my workflow stops running. Check in to a Ned Watch deadman, or start/finish an overrun run."
+author: "Ned Watch"
+branding:
+  icon: "bell"
+  color: "orange"
+
+inputs:
+  watch-id:
+    description: "Your watch id (w_...). Store it as a secret or variable."
+    required: true
+  signing-secret:
+    description: "The watch's signing secret (whs_...). Store it as a secret."
+    required: true
+  mode:
+    description: "checkin (deadman), start or finish (overrun)."
+    required: false
+    default: "checkin"
+  run-id:
+    description: "Overrun run id. Default: gh-<run id>-<attempt>, so start and finish match and a re-run is a new run."
+    required: false
+    default: ""
+  api:
+    description: "Ned Watch API base URL."
+    required: false
+    default: "https://api.ned.watch"
+  fail-on-error:
+    description: "Fail this step if Ned can't be reached. Default false: a hiccup on my side never breaks your workflow."
+    required: false
+    default: "false"
+
+outputs:
+  ok:
+    description: "true when Ned recorded it."
+    value: ${{ steps.ned.outputs.ok }}
+  response:
+    description: "Ned's JSON answer (no secrets in it)."
+    value: ${{ steps.ned.outputs.response }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: ned
+      shell: bash
+      env:
+        NED_WATCH_ID: ${{ inputs.watch-id }}
+        NED_SIGNING_SECRET: ${{ inputs.signing-secret }}
+        NED_MODE: ${{ inputs.mode }}
+        NED_RUN_ID: ${{ inputs.run-id }}
+        NED_API: ${{ inputs.api }}
+        NED_FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
+      run: bash "${{ github.action_path }}/ned.sh"
