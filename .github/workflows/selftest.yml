@@ -1,8 +1,7 @@
 name: selftest
+# Manual: needs a live test deadman + overrun watch in the NED_TEST_* secrets (cancelled between runs so they never fire).
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
 jobs:
   selftest:
     if: ${{ github.repository == 'ned-mind/deadman-action' }}
