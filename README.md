@@ -1,5 +1,7 @@
 # Ned Watch: deadman check-in
 
+[![Ned Watch status](https://api.ned.watch/v1/status/badge.svg)](https://ned.watch/status/)
+
 Your nightly job stopped running three days ago. Who noticed?
 
 Add one step at the end of a scheduled workflow. Every time the workflow finishes, it checks in with
