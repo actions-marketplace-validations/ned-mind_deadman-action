@@ -19,12 +19,13 @@ Make a deadman watch that expects a check-in at least as often as your schedule 
 
 ```bash
 curl -s -X POST https://api.ned.watch/v1/watches \
-  -H 'Content-Type: application/json' \
+  -H 'Content-Type: application/json' -H 'X-Ned-Ref: github-action' \
   -d '{"type":"deadman","interval_s":86400,"condition":{"grace_s":90000},
        "callback_url":"https://your-agent.example/hooks/ned"}'
 ```
 
-The response has `watch_id`, `signing_secret` and, on your first call, `agent_key` (shown once: keep it). Save the first
+The response has `watch_id`, `signing_secret` and, on your first call, `agent_key` (shown once: keep it), plus `next` with
+the exact check-in line. The clock starts at your first check-in, so let the workflow run once (or run that line). Save the first
 two as repository secrets `NED_WATCH_ID` and `NED_SIGNING_SECRET`. A signed test message reaches your callback right away.
 Your first five watches are free.
 
